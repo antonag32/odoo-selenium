@@ -66,6 +66,15 @@ class SeleniumCase(HttpCase):
         super().setUp()
         self.start_selenium()
 
+    def selenium_options(self) -> Options:
+        """Generate the options used when creating a new Chrome driver. Not used for Remote executors (e.g. Grid)."""
+        options = Options()
+        options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
+        for key, value in self.chrome_flags.items():
+            options.add_argument(f"{key}={value}" if value else key)
+
+        return options
+
     def tearDown(self) -> None:
         super().tearDown()
         self.stop_selenium()
@@ -93,7 +102,7 @@ class SeleniumCase(HttpCase):
 
             self.driver = Chrome(
                 service=Service(),
-                options=options,
+                options=self.selenium_options(),
             )
 
         self.wait = WebDriverWait(self.driver, timeout=self.selenium_timeout, poll_frequency=1)
